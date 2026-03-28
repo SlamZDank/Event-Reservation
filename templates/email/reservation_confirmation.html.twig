@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Reservation Confirmed - EventRes</title>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #e8e8e8;
+            font-family: 'DM Mono', 'Courier New', monospace;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #111111;
+            border: 1px solid #2a2a2a;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .header {
+            padding: 20px 30px;
+            border-bottom: 1px solid #2a2a2a;
+            background-color: #1a1a1a;
+        }
+        .logo {
+            font-family: 'Syne', sans-serif, 'Arial';
+            font-weight: 800;
+            font-size: 1.2rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: #f5a623;
+            margin: 0;
+        }
+        .content {
+            padding: 30px;
+        }
+        h1 {
+            font-family: 'Syne', sans-serif, 'Arial';
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-top: 0;
+            color: #ffffff;
+        }
+        .event-details {
+            background-color: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 4px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+        .event-details h2 {
+            font-family: 'Syne', sans-serif, 'Arial';
+            color: #f5a623;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.25rem;
+        }
+        .detail-row {
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+        .detail-label {
+            color: #666666;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.75rem;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .footer {
+            padding: 20px 30px;
+            text-align: center;
+            border-top: 1px solid #2a2a2a;
+            background-color: #050505;
+            color: #666666;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2 class="logo">EventRes</h2>
+        </div>
+        <div class="content">
+            <h1>Reservation Successful!</h1>
+            <p>Hi {{ name }},</p>
+            <p>Your seat has been successfully reserved. We are excited to see you there!</p>
+
+            <div class="event-details">
+                <h2>{{ event_title }}</h2>
+                <div class="detail-row">
+                    <span class="detail-label">Date & Time</span>
+                    <span>{{ event_date }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Location</span>
+                    <span>{{ event_location }}</span>
+                </div>
+                <div class="detail-row" style="margin-top: 20px;">
+                    <span class="detail-label">Your Registration Info</span>
+                    <span>{{ name }} &bull; {{ email }}</span>
+                </div>
+            </div>
+
+            <p style="font-size: 0.85rem; color: #94a3b8;">
+                If you have any questions or need to cancel, please contact the administrators.
+            </p>
+        </div>
+        <div class="footer">
+            &copy; {{ "now"|date("Y") }} EventRes. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>
