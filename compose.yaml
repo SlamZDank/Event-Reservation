@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  php:
+    build: .
+    container_name: symfony_php
+    environment:
+      - DATABASE_URL=postgresql://symfony:secret@db:5432/eventdb?serverVersion=15&charset=utf8
+      - APP_ENV=dev
+      - APP_SECRET=changeme_random_string_here
+      - APP_DOMAIN=localhost
+      - WEBAUTHN_RP_NAME=Event Reservation
+      - RELYING_PARTY_ID=localhost
+      - RELYING_PARTY_NAME="Event Reservation"
+      - CORS_ALLOW_ORIGIN='^https?://(localhost|127\.0\.0\.1|.*\.ngrok-free\.dev|.*\.ngrok\.app)(:[0-9]+)?$$'
+      - JWT_PASSPHRASE=changeme_jwt_passphrase
+      - JWT_TOKEN_TTL=3600
+      - JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
+      - JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
+    volumes:
+      - .:/var/www
+    depends_on:
+      - db
+    networks:
+      - app_network
+
+  nginx:
+    image: docker.io/nginx:alpine
+    container_name: symfony_nginx
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - ./public:/var/www/public:ro
+      - ./docker/nginx:/etc/nginx/conf.d
+      - ./docker/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - php
+    networks:
+      - app_network
+
+
+  db:
+    image: docker.io/postgres:16-alpine
+    container_name: symfony_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: eventdb
+      POSTGRES_USER: symfony
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
