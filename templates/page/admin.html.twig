@@ -1,0 +1,1097 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}EventRes | Admin Page
+{% endblock %}
+
+
+
+{% block stylesheets %}
+	<style>
+		.admin-layout {
+			display: flex;
+			flex: 1;
+			width: 100%;
+		}
+
+		.sidebar {
+			background: var(--surface);
+			border-right: 1px solid var(--border);
+			padding: 2rem 0;
+			position: sticky;
+			top: 56px;
+			height: calc(100vh - 56px);
+			overflow-y: auto;
+			overflow-x: hidden;
+			width: 220px;
+			flex-shrink: 0;
+			transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+		.sidebar.collapsed {
+			width: 68px;
+		}
+		.sidebar.collapsed .sidebar-label {
+			opacity: 0;
+			pointer-events: none;
+		}
+		.sidebar.collapsed .sidebar-text {
+			display: none;
+		}
+		.sidebar-text,
+		.sidebar-label {
+			transition: opacity 0.2s ease;
+			white-space: nowrap;
+		}
+
+		.sidebar-toggle {
+			margin: 0 1.5rem 1.5rem;
+			background: transparent;
+			border: 1px solid var(--border);
+			color: var(--text-muted);
+			border-radius: var(--radius);
+			width: 32px;
+			height: 32px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+			transition: all 0.15s;
+		}
+		.sidebar-toggle:hover {
+			color: var(--text);
+			background: var(--surface2);
+		}
+		.sidebar.collapsed .sidebar-toggle {
+			margin: 0 auto 1.5rem;
+		}
+
+		.sidebar-label {
+			font-size: 0.6rem;
+			letter-spacing: 0.15em;
+			text-transform: uppercase;
+			color: var(--text-faint);
+			padding: 0 1.5rem;
+			margin-bottom: 0.5rem;
+			margin-top: 1.5rem;
+		}
+
+		.sidebar-item {
+			display: flex;
+			align-items: center;
+			gap: 0.75rem;
+			padding: 0.6rem 1.5rem;
+			font-size: 0.78rem;
+			color: var(--text-muted);
+			cursor: pointer;
+			transition: all 0.15s;
+			border-left: 2px solid transparent;
+		}
+
+		.sidebar-item:hover {
+			color: var(--text);
+			background: var(--surface2);
+		}
+		.sidebar-item.active {
+			color: var(--amber);
+			border-left-color: var(--amber);
+			background: rgba(245, 166, 35, 0.04);
+		}
+
+		.main {
+			flex: 1;
+			padding: 2.5rem;
+			overflow-y: auto;
+			min-width: 0;
+		}
+
+		.page-header {
+			display: flex;
+			align-items: flex-start;
+			justify-content: space-between;
+			margin-bottom: 2rem;
+			gap: 1rem;
+		}
+
+		.page-title {
+			font-family: 'Syne', sans-serif;
+			font-weight: 800;
+			font-size: 1.5rem;
+		}
+
+		.page-sub {
+			font-size: 0.75rem;
+			color: var(--text-muted);
+			margin-top: 0.25rem;
+		}
+
+		.stats-row {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+			gap: 1px;
+			background: var(--border);
+			border: 1px solid var(--border);
+			border-radius: var(--radius);
+			overflow: hidden;
+			margin-bottom: 2.5rem;
+		}
+
+		.stat-card {
+			background: var(--surface);
+			padding: 1.25rem 1.5rem;
+		}
+
+		.stat-label {
+			font-size: 0.65rem;
+			letter-spacing: 0.12em;
+			text-transform: uppercase;
+			color: var(--text-muted);
+			margin-bottom: 0.4rem;
+		}
+
+		.stat-value {
+			font-family: 'Syne', sans-serif;
+			font-weight: 700;
+			font-size: 1.75rem;
+			color: var(--amber);
+		}
+
+		.table-wrapper {
+			background: var(--surface);
+			border: 1px solid var(--border);
+			border-radius: var(--radius);
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+		}
+
+		.table-header {
+			padding: 1rem 1.25rem;
+			border-bottom: 1px solid var(--border);
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 1rem;
+			flex-wrap: wrap;
+		}
+
+		.table-title {
+			font-family: 'Syne', sans-serif;
+			font-weight: 700;
+			font-size: 0.85rem;
+		}
+
+		.section-page {
+			display: none;
+		}
+		.section-page.active {
+			display: block;
+		}
+
+		/* SEARCH & FILTER */
+		.search-filter-row {
+			display: flex;
+			gap: 0.75rem;
+			align-items: center;
+			flex-wrap: wrap;
+		}
+		.search-input {
+			background: var(--surface2);
+			border: 1px solid var(--border);
+			border-radius: var(--radius);
+			color: var(--text);
+			font-family: 'DM Mono', monospace;
+			font-size: 0.78rem;
+			padding: 0.5rem 0.85rem;
+			min-width: 200px;
+			outline: none;
+			transition: border-color 0.15s;
+		}
+		.search-input:focus {
+			border-color: var(--amber);
+		}
+		.search-input::placeholder {
+			color: var(--text-faint);
+		}
+
+		.filter-select {
+			background: var(--surface2);
+			border: 1px solid var(--border);
+			border-radius: var(--radius);
+			color: var(--text);
+			font-family: 'DM Mono', monospace;
+			font-size: 0.78rem;
+			padding: 0.5rem 0.85rem;
+			outline: none;
+			cursor: pointer;
+		}
+		.filter-select:focus {
+			border-color: var(--amber);
+		}
+
+		/* STATUS BADGES */
+		.badge-upcoming {
+			background: rgba(59, 130, 246, 0.12);
+			color: #60a5fa;
+			border: 1px solid rgba(59, 130, 246, 0.25);
+		}
+		.badge-ongoing {
+			background: rgba(74, 222, 128, 0.12);
+			color: var(--green);
+			border: 1px solid rgba(74, 222, 128, 0.25);
+		}
+		.badge-passed {
+			background: rgba(248, 113, 113, 0.08);
+			color: var(--red);
+			border: 1px solid rgba(248, 113, 113, 0.2);
+		}
+
+		/* MODALS */
+		.modal-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 0 1rem;
+		}
+		.modal-grid .form-group:nth-child(odd):last-child {
+			grid-column: 1 / -1;
+		}
+		textarea {
+			resize: vertical;
+			min-height: 80px;
+		}
+
+		/* IMAGE UPLOAD */
+		.image-grid {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 0.5rem;
+			margin-top: 0.5rem;
+		}
+		.image-preview {
+			position: relative;
+			width: 60px;
+			height: 60px;
+			border-radius: var(--radius);
+			overflow: hidden;
+			background: var(--surface2);
+		}
+		.image-preview img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+		.image-delete {
+			position: absolute;
+			top: 2px;
+			right: 2px;
+			background: rgba(0, 0, 0, 0.6);
+			color: white;
+			border: none;
+			border-radius: 50%;
+			width: 20px;
+			height: 20px;
+			font-size: 10px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+		}
+		.image-delete:hover {
+			background: red;
+		}
+
+		/* DROPZONE */
+		.dropzone {
+			border: 2px dashed var(--text-faint);
+			border-radius: var(--radius);
+			padding: 2rem;
+			text-align: center;
+			background: var(--surface2);
+			color: var(--text-muted);
+			cursor: pointer;
+			transition: all 0.2s ease;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			gap: 0.5rem;
+		}
+		.dropzone:hover,
+		.dropzone.dragover {
+			border-color: var(--amber);
+			color: var(--amber);
+			background: rgba(245, 166, 35, 0.05);
+		}
+		.dropzone-icon {
+			font-size: 2rem;
+			opacity: 0.7;
+		}
+		.dropzone-text {
+			font-size: 0.8rem;
+		}
+
+		/* PAGINATION */
+		.table-pagination {
+			display: flex;
+			padding: 1rem 1.25rem;
+			border-top: 1px solid var(--border);
+			justify-content: space-between;
+			align-items: center;
+		}
+	</style>
+{% endblock %}
+
+{% block body %}
+	<div
+		class="admin-layout">
+		{# SIDEBAR Area #}
+		<aside class="sidebar" id="admin-sidebar">
+			<button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle Sidebar">≡</button>
+			<div class="sidebar-label">Management</div>
+			<div class="sidebar-item active" onclick="showSection('events')">
+				<span class="sidebar-icon">📅</span>
+				<span class="sidebar-text">Events</span>
+			</div>
+			<div class="sidebar-item" onclick="showSection('reservations')">
+				<span class="sidebar-icon">🎫</span>
+				<span class="sidebar-text">Reservations</span>
+			</div>
+			<div class="sidebar-item" onclick="showSection('settings')">
+				<span class="sidebar-icon">⚙️</span>
+				<span class="sidebar-text">Settings</span>
+			</div>
+		</aside>
+
+		<main
+			class="main">
+
+			{# EVENTS Area #}
+			<div id="section-events" class="section-page active">
+				<div class="page-header">
+					<div>
+						<h1 class="page-title">Events</h1>
+						<p class="page-sub">Manage all events</p>
+					</div>
+					<button class="btn btn-primary" onclick="openCreateModal()">+ New Event</button>
+				</div>
+
+				<div class="stats-row" id="stats-row">
+					<div class="stat-card">
+						<div class="stat-label">Total Events</div>
+						<div class="stat-value" id="stat-total">—</div>
+					</div>
+					<div class="stat-card">
+						<div class="stat-label">Upcoming</div>
+						<div class="stat-value" id="stat-upcoming">—</div>
+					</div>
+					<div class="stat-card">
+						<div class="stat-label">Ongoing</div>
+						<div class="stat-value" id="stat-ongoing">—</div>
+					</div>
+					<div class="stat-card">
+						<div class="stat-label">Passed</div>
+						<div class="stat-value" id="stat-passed">—</div>
+					</div>
+				</div>
+
+				<div class="table-wrapper">
+					<div class="table-header">
+						<span class="table-title">All Events</span>
+						<div class="search-filter-row">
+							<input type="text" class="search-input" id="admin-search" placeholder="Search events..." oninput="debouncedSearch()">
+							<select class="filter-select" id="admin-status-filter" onchange="loadEvents(1)">
+								<option value="">All Statuses</option>
+								<option value="upcoming">Upcoming</option>
+								<option value="ongoing">Ongoing</option>
+								<option value="passed">Passed</option>
+							</select>
+						</div>
+					</div>
+					<div id="events-table-loading" style="padding:2rem; text-align:center; color:var(--text-muted);">
+						<span class="spinner"></span>
+					</div>
+					<table id="events-table" style="display:none">
+						<thead>
+							<tr>
+								<th>Title</th>
+								<th>Date</th>
+								<th>Location</th>
+								<th>Status</th>
+								<th>Seats</th>
+								<th>Available</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody id="events-tbody"></tbody>
+					</table>
+					<div id="events-empty" class="empty" style="display:none; padding:2rem;">
+						<p>No events found matching your criteria.</p>
+					</div>
+					<div id="admin-events-pagination" class="table-pagination" style="display:none;">
+						<span id="admin-page-info" style="font-size: 0.75rem; color: var(--text-muted);"></span>
+						<div style="display:flex; gap:0.5rem;">
+							<button class="btn btn-sm btn-outline" id="btn-admin-prev" onclick="loadEvents(currentAdminPage - 1)">Prev</button>
+							<button class="btn btn-sm btn-outline" id="btn-admin-next" onclick="loadEvents(currentAdminPage + 1)">Next</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			{# RESERVATIONS Area #}
+			<div id="section-reservations" class="section-page">
+				<div class="page-header">
+					<div>
+						<h1 class="page-title">Reservations</h1>
+						<p class="page-sub">View reservations by event</p>
+					</div>
+				</div>
+
+				<div class="form-group" style="max-width:100%; margin-bottom:1.5rem;">
+					<label for="event-search">Search & Select Event</label>
+					<div style="display:flex; gap:0.5rem; align-items:center;">
+						<input type="text" id="event-search" placeholder="Type to filter events..." style="flex:1" oninput="filterEventSelect()">
+						<select id="event-select" onchange="loadReservations()" style="flex:2">
+							<option value="">— Choose an event —</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="table-wrapper">
+					<div class="table-header">
+						<span class="table-title" id="res-table-title">Reservations</span>
+					</div>
+					<div id="res-loading" style="padding:2rem; text-align:center; color:var(--text-muted); display:none">
+						<span class="spinner"></span>
+					</div>
+					<div id="res-empty" class="empty" style="padding:2rem; display:none">
+						<p>Select an event to list its reservations</p>
+					</div>
+					<table id="res-table" style="display:none">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Email</th>
+								<th>Phone</th>
+								<th>Registered</th>
+							</tr>
+						</thead>
+						<tbody id="res-tbody"></tbody>
+					</table>
+				</div>
+			</div>
+
+			{# SETTINGS Area #}
+			<div id="section-settings" class="section-page">
+				<div class="page-header">
+					<div>
+						<h1 class="page-title">Settings</h1>
+						<p class="page-sub">Configure global application variables</p>
+					</div>
+				</div>
+
+				<div class="card" style="max-width: 600px; padding: 2rem;">
+					<h3 style="font-family: 'Syne', sans-serif; margin-bottom: 1.5rem; font-size: 1.2rem;">Mail Server Integration</h3>
+					<div id="settings-alert" class="alert"></div>
+					<div class="form-group" style="margin-bottom: 1.5rem;">
+						<label for="admin-resend-api-key">Resend API Key</label>
+						<input type="password" id="admin-resend-api-key" placeholder="re_xxxxxxxxxxxxxxxxx" />
+						<small style="color: var(--text-faint); margin-top: 0.5rem; display: block;">
+							Required for sending reservation confirmation emails. 
+							<span id="resend-configured-badge" style="display:none;" class="badge badge-green">Connected</span>
+						</small>
+					</div>
+					<button class="btn btn-primary" id="btn-save-settings" onclick="saveAdminSettings()">Save Configuration</button>
+				</div>
+			</div>
+
+		</main>
+	</div>
+
+	{# Create / Edit Modal #}
+	<div class="modal-backdrop" id="event-modal">
+		<div class="modal">
+			<div class="modal-title" id="modal-title">New Event</div>
+			<div id="alert-modal" class="alert"></div>
+			<div class="modal-grid">
+				<div class="form-group" style="grid-column:1/-1">
+					<label for="m-title">Title</label>
+					<input type="text" id="m-title" placeholder="Event title">
+				</div>
+				<div class="form-group" style="grid-column:1/-1">
+					<label for="m-description">Description</label>
+					<textarea id="m-description" placeholder="Describe the event..."></textarea>
+				</div>
+				<div class="form-group">
+					<label for="m-date">Start Date & Time</label>
+					<input type="datetime-local" id="m-date">
+				</div>
+				<div class="form-group">
+					<label for="m-end-date">End Date & Time</label>
+					<input type="datetime-local" id="m-end-date">
+				</div>
+				<div class="form-group">
+					<label for="m-seats">Total Seats</label>
+					<input type="number" id="m-seats" placeholder="50" min="1">
+				</div>
+				<div class="form-group">
+					<label for="m-location">Location</label>
+					<input type="text" id="m-location" placeholder="Venue or address">
+				</div>
+				<div class="form-group" style="grid-column:1/-1; margin-top:0.5rem">
+					<label>Images</label>
+					<div class="dropzone" id="m-dropzone" onclick="document.getElementById('m-images').click()">
+						<div class="dropzone-icon">📸</div>
+						<div class="dropzone-text">Click or drag images to upload</div>
+						<input type="file" id="m-images" multiple accept="image/jpeg, image/png, image/webp" style="display:none;" onchange="updateLocalPreview(this)">
+					</div>
+					<div class="image-grid" id="m-image-preview"></div>
+				</div>
+			</div>
+			<div style="display:flex; gap:0.75rem; justify-content:flex-end; margin-top:0.5rem;">
+				<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+				<button class="btn btn-primary" id="modal-save-btn" onclick="saveEvent()">Create</button>
+			</div>
+		</div>
+	</div>
+
+	{# View Modal #}
+	<div class="modal-backdrop" id="view-modal">
+		<div class="modal">
+			<div class="modal-title" id="view-modal-title">Event Details</div>
+			<div id="view-details-content" style="margin-bottom:1.5rem; font-size:0.85rem; line-height:1.6; color:var(--text); display:grid; gap:0.5rem">
+				<!-- details injected here -->
+			</div>
+			<div style="display:flex; gap:0.75rem; justify-content:flex-end; margin-top:0.5rem;">
+				<button class="btn btn-ghost" onclick="document.getElementById('view-modal').classList.remove('open')">Close</button>
+				<button class="btn btn-outline" id="view-btn-edit">Edit</button>
+				<button class="btn btn-danger" id="view-btn-delete">Delete</button>
+			</div>
+		</div>
+	</div>
+
+	{# Delete Confirmation Modal #}
+	<div class="modal-backdrop" id="delete-modal">
+		<div class="modal" style="max-width:360px">
+			<div class="modal-title">Delete Event?</div>
+			<p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:1.5rem;">This will permanently delete the event and all of its reservations.</p>
+			<div style="display:flex; gap:0.75rem; justify-content:flex-end;">
+				<button class="btn btn-ghost" onclick="document.getElementById('delete-modal').classList.remove('open')">Cancel</button>
+				<button class="btn btn-danger" id="confirm-delete-btn">Delete permanently</button>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+
+{% block javascripts %}
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			if (!API.token() || !API.isAdmin()) {
+				window.location.href = '/login';
+			}
+			if (window.innerWidth <= 768) {
+				document.getElementById('admin-sidebar').classList.add('collapsed');
+			}
+		});
+
+let editingId = null;
+let events = [];
+let allEventsForSelect = [];
+
+function showSection(name) {
+	document.querySelectorAll('.section-page').forEach(s => s.classList.remove('active'));
+	document.getElementById (`section-${name}`).classList.add('active');
+	const items = Array.from(document.querySelectorAll('.sidebar-item'));
+	const sectionNames = ['events', 'reservations', 'settings'];
+	document.querySelectorAll('.sidebar-item').forEach((item, i) => {
+		item.classList.toggle('active', sectionNames[i] === name);
+	});
+	if (name === 'reservations' && allEventsForSelect.length === 0) {
+		loadAllEventsForSelect();
+	}
+	if (name === 'settings') {
+		loadAdminSettings();
+	}
+}
+
+function toggleSidebar() {
+document.getElementById('admin-sidebar').classList.toggle('collapsed');
+}
+
+let currentAdminPage = 1;
+let searchTimeout = null;
+
+function debouncedSearch() {
+clearTimeout(searchTimeout);
+searchTimeout = setTimeout(() => loadEvents(1), 300);
+}
+
+function getStatusBadge(status) {
+const labels = {
+upcoming: 'Upcoming',
+ongoing: 'Ongoing',
+passed: 'Passed'
+};
+return `<span class="badge badge-${status}">${
+labels[status] || status
+}</span>`;
+}
+
+// EVENTS
+async function loadEvents(page = 1) {
+currentAdminPage = page;
+document.getElementById('events-table-loading').style.display = 'block';
+document.getElementById('events-table').style.display = 'none';
+document.getElementById('events-empty').style.display = 'none';
+document.getElementById('admin-events-pagination').style.display = 'none';
+
+const search = document.getElementById('admin-search').value.trim();
+const status = document.getElementById('admin-status-filter').value;
+let url = `/api/events?all=true&page=${page}&limit=10`;
+if (search) 
+url += `&search=${
+encodeURIComponent(search)
+}`;
+
+if (status) 
+url += `&status=${status}`;
+
+
+const res = await API.get(url);
+document.getElementById('events-table-loading').style.display = 'none';
+
+events = res.data ?. data || [];
+const meta = res.data ?. meta || {
+total: 0
+};
+
+// Statistics
+const total = meta.total || 0;
+const upcoming = events.filter(e => e.status === 'upcoming').length;
+const ongoing = events.filter(e => e.status === 'ongoing').length;
+const passed = events.filter(e => e.status === 'passed').length;
+document.getElementById('stat-total').textContent = total;
+document.getElementById('stat-upcoming').textContent = upcoming;
+document.getElementById('stat-ongoing').textContent = ongoing;
+document.getElementById('stat-passed').textContent = passed;
+
+if (events.length === 0) {
+document.getElementById('events-empty').style.display = 'block';
+return;
+}
+
+// Events List
+const tbody = document.getElementById('events-tbody');
+tbody.innerHTML = '';
+events.forEach(e => {
+const tr = document.createElement('tr');
+tr.innerHTML = `
+      <td style="font-weight:400">${
+e.title
+}</td>
+      <td style="color:var(--text-muted)">${
+formatDate(e.date)
+}</td>
+      <td style="color:var(--text-muted)">${
+e.location
+}</td>
+      <td>${
+getStatusBadge(e.status)
+}</td>
+      <td>${
+e.seats
+}</td>
+      <td>${
+e.available_seats === 0 ? '<span class="badge badge-red">0</span>' : `<span class="badge badge-green">${
+e.available_seats
+}</span>`
+}</td>
+      <td style="white-space: nowrap;">
+        <button class="btn btn-sm btn-outline" onclick="openViewModal(${e.id})">Details</button>
+      </td>
+    `;
+tbody.appendChild(tr);
+});
+
+document.getElementById('events-table').style.display = 'table';
+
+if (meta && meta.last_page > 1) {
+const pag = document.getElementById('admin-events-pagination');
+pag.style.display = 'flex';
+document.getElementById('btn-admin-prev').disabled = meta.page<= 1;
+document.getElementById('btn-admin-next').disabled = meta.page >= meta.last_page;
+document.getElementById('admin-page-info').textContent = `Page ${
+meta.page
+} of ${
+meta.last_page
+} (${
+meta.total
+} total events)`;
+}
+}
+
+// Load ALL events for the reservation dropdown (unpaginated)
+async function loadAllEventsForSelect() {
+const res = await API.get('/api/events?all=true&limit=1000');
+allEventsForSelect = res.data ?. data || [];
+renderEventSelect(allEventsForSelect);
+}
+
+function renderEventSelect(eventsList) {
+const sel = document.getElementById('event-select');
+sel.innerHTML = '<option value="">— Choose an event —</option>';
+eventsList.forEach(e => {
+const opt = document.createElement('option');
+opt.value = e.id;
+opt.textContent = `${
+e.title
+} (${
+e.status
+})`;
+sel.appendChild(opt);
+});
+}
+
+function filterEventSelect() {
+const query = document.getElementById('event-search').value.toLowerCase();
+const filtered = allEventsForSelect.filter(e => e.title.toLowerCase().includes(query) || e.location.toLowerCase().includes(query));
+renderEventSelect(filtered);
+}
+
+function openViewModal(id) {
+	const event = events.find(e => e.id === id);
+	if (!event) return;
+
+	document.getElementById('view-modal-title').textContent = event.title;
+	document.getElementById('view-details-content').innerHTML = `
+		<div style="display:flex; gap:0.5rem; align-items:center;"><strong>Status:</strong> ${getStatusBadge(event.status)}</div>
+		<div><strong>Start Date:</strong> ${formatDate(event.date)}</div>
+		<div><strong>End Date:</strong> ${formatDate(event.end_date)}</div>
+		<div><strong>Location:</strong> ${event.location}</div>
+		<div><strong>Seats:</strong> ${event.seats} total, <span style="color:var(--amber)">${event.available_seats} available</span></div>
+		<div><strong>Description:</strong></div>
+		<div style="background:var(--surface2); padding:0.75rem; border-radius:var(--radius); margin-top:0.25rem; max-height:150px; overflow-y:auto;">${event.description}</div>
+	`;
+
+	document.getElementById('view-btn-edit').onclick = () => {
+		document.getElementById('view-modal').classList.remove('open');
+		openEditModal(id);
+	};
+	document.getElementById('view-btn-delete').onclick = () => {
+		document.getElementById('view-modal').classList.remove('open');
+		confirmDelete(id);
+	};
+
+	document.getElementById('view-modal').classList.add('open');
+}
+
+function openCreateModal() {
+editingId = null;
+document.getElementById('modal-title').textContent = 'New Event';
+document.getElementById('modal-save-btn').textContent = 'Create';
+[
+'m-title',
+'m-description',
+'m-date',
+'m-end-date',
+'m-seats',
+'m-location'
+].forEach(id => {
+document.getElementById(id).value = '';
+});
+document.getElementById('m-images').value = '';
+document.getElementById('m-image-preview').innerHTML = '';
+document.getElementById('alert-modal').classList.remove('show');
+document.getElementById('event-modal').classList.add('open');
+}
+
+function openEditModal(id) {
+const event = events.find(e => e.id === id);
+if (! event) 
+return;
+
+editingId = id;
+document.getElementById('modal-title').textContent = 'Edit Event';
+document.getElementById('modal-save-btn').textContent = 'Save';
+document.getElementById('m-title').value = event.title;
+document.getElementById('m-description').value = event.description;
+document.getElementById('m-date').value = event.date.replace(' ', 'T').slice(0, 16);
+document.getElementById('m-end-date').value = event.end_date.replace(' ', 'T').slice(0, 16);
+document.getElementById('m-seats').value = event.seats;
+document.getElementById('m-location').value = event.location;
+document.getElementById('m-images').value = '';
+
+const preview = document.getElementById('m-image-preview');
+preview.innerHTML = '';
+if (event.images && event.images.length > 0) {
+event.images.forEach(img => {
+preview.innerHTML += `
+        <div class="image-preview" id="preview-img-${
+img.id
+}">
+          <img src="${
+img.url
+}" alt="Event image">
+          <button class="image-delete" onclick="deleteImage(${
+event.id
+}, ${
+img.id
+})" type="button">✕</button>
+        </div>
+      `;
+});
+}
+
+document.getElementById('alert-modal').classList.remove('show');
+document.getElementById('event-modal').classList.add('open');
+}
+
+function closeModal() {
+document.getElementById('event-modal').classList.remove('open');
+}
+
+async function saveEvent() {
+const body = {
+title: document.getElementById('m-title').value.trim(),
+description: document.getElementById('m-description').value.trim(),
+date: document.getElementById('m-date').value.replace('T', ' ') + ':00',
+end_date: document.getElementById('m-end-date').value.replace('T', ' ') + ':00',
+seats: parseInt(document.getElementById('m-seats').value),
+location: document.getElementById('m-location').value.trim()
+};
+
+if (! body.title || ! body.description || ! body.date || ! body.end_date || ! body.seats || ! body.location) {
+showAlert('alert-modal', 'Fill all fields.', 'error');
+return;
+}
+
+const btn = document.getElementById('modal-save-btn');
+btn.disabled = true;
+btn.innerHTML = '<span class="spinner"></span>';
+
+const res = editingId ? await API.put (`/api/events/${editingId}`, body) : await API.post('/api/events', body);
+
+if (res.ok) {
+const eventId = res.data.id;
+const fileInput = document.getElementById('m-images');
+
+if (fileInput.files.length > 0) {
+const formData = new FormData();
+for (const file of fileInput.files) {
+formData.append('images[]', file);
+}
+
+const token = API.token();
+const headers = {};
+if (token) 
+headers['Authorization'] = `Bearer ${token}`;
+
+
+const uploadRes = await fetch (`/api/events/${eventId}/images`, {
+method: 'POST',
+headers: headers,
+body: formData
+});
+
+if (! uploadRes.ok) {
+btn.disabled = false;
+btn.textContent = editingId ? 'Save' : 'Create';
+showAlert('alert-modal', 'Event saved but image upload failed.', 'error');
+return;
+}
+}
+
+closeModal();
+loadEvents(currentAdminPage);
+allEventsForSelect = []; // reset so dropdown reloads
+} else {
+showAlert('alert-modal', res.data.error || 'Failed to save.', 'error');
+} btn.disabled = false;
+btn.textContent = editingId ? 'Save' : 'Create';
+}
+
+async function deleteImage(eventId, imageId) {
+if (!confirm('Delete this image?')) 
+return;
+
+const res = await API.delete(`/api/events/${eventId}/images/${imageId}`);
+if (res.ok) {
+const el = document.getElementById (`preview-img-${imageId}`);
+if (el) 
+el.remove();
+
+const event = events.find(e => e.id === eventId);
+if (event) {
+event.images = event.images.filter(i => i.id !== imageId);
+}
+} else {
+showAlert('alert-modal', 'Failed to delete image.', 'error');
+}
+}
+
+function confirmDelete(id) {
+const modal = document.getElementById('delete-modal');
+modal.classList.add('open');
+document.getElementById('confirm-delete-btn').onclick = async () => {
+const res = await API.delete (`/api/events/${id}`);
+modal.classList.remove('open');
+if (res.ok) 
+loadEvents(currentAdminPage);
+
+};
+}
+
+// Reservations
+async function loadReservations() {
+const id = document.getElementById('event-select').value;
+if (! id) {
+document.getElementById('res-table').style.display = 'none';
+document.getElementById('res-empty').style.display = 'block';
+document.getElementById('res-empty').querySelector('p').textContent = 'select an event to list its reservations';
+return;
+}
+
+document.getElementById('res-empty').style.display = 'none';
+document.getElementById('res-table').style.display = 'none';
+document.getElementById('res-loading').style.display = 'block';
+
+const res = await API.get (`/api/reservations/event/${id}`);
+document.getElementById('res-loading').style.display = 'none';
+
+const event = allEventsForSelect.find(e => e.id == id);
+document.getElementById('res-table-title').textContent = `${
+event ? event.title : 'Event'
+} — ${
+res.data ?. length || 0
+} reservations`;
+
+if (! res.ok || ! res.data.length) {
+document.getElementById('res-empty').style.display = 'block';
+document.getElementById('res-empty').querySelector('p').textContent = 'This event has no reservations';
+return;
+}
+
+const tbody = document.getElementById('res-tbody');
+tbody.innerHTML = '';
+res.data.forEach(r => {
+const tr = document.createElement('tr');
+tr.innerHTML = `
+      <td>${
+r.name
+}</td>
+      <td style="color:var(--text-muted)">${
+r.email
+}</td>
+      <td style="color:var(--text-muted)">${
+r.phone
+}</td>
+      <td style="color:var(--text-muted)">${
+formatDate(r.created_at)
+}</td>
+    `;
+tbody.appendChild(tr);
+});
+
+document.getElementById('res-table').style.display = 'table';
+}
+
+// Close modals
+document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+backdrop.addEventListener('click', e => {
+if (e.target === backdrop) 
+backdrop.classList.remove('open');
+
+});
+});
+
+// Dropzone Drag and Drop
+const dropzone = document.getElementById('m-dropzone');
+if (dropzone) {
+dropzone.addEventListener('dragover', (e) => {
+e.preventDefault();
+dropzone.classList.add('dragover');
+});
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+dropzone.addEventListener('drop', (e) => {
+e.preventDefault();
+dropzone.classList.remove('dragover');
+const files = e.dataTransfer.files;
+if (files.length) {
+document.getElementById('m-images').files = files;
+updateLocalPreview(document.getElementById('m-images'));
+}
+});
+}
+
+function updateLocalPreview(input) {
+// Only handle new local preview
+// Existing images are rendered differently during edit
+if (! input.files || input.files.length === 0) 
+return;
+
+
+// Create a separate container for new uploads to not overwrite existing images
+let newPreview = document.getElementById('m-new-preview');
+if (! newPreview) {
+newPreview = document.createElement('div');
+newPreview.id = 'm-new-preview';
+newPreview.style.display = 'contents';
+document.getElementById('m-image-preview').appendChild(newPreview);
+}
+newPreview.innerHTML = '';
+
+Array.from(input.files).forEach(file => {
+const reader = new FileReader();
+reader.onload = (e) => {
+newPreview.innerHTML += `
+        <div class="image-preview" style="border: 2px solid var(--green)">
+          <img src="${
+e.target.result
+}" alt="Pending upload">
+        </div>
+      `;
+};
+reader.readAsDataURL(file);
+});
+}
+
+loadEvents();
+loadAllEventsForSelect();
+// SETTINGS LOGIC
+async function loadAdminSettings() {
+	try {
+		const res = await API.get('/api/admin/settings');
+		if (res.ok) {
+			const maskedKey = res.data.resend_api_key_masked;
+			const input = document.getElementById('admin-resend-api-key');
+			input.value = maskedKey || '';
+			
+			const badge = document.getElementById('resend-configured-badge');
+			badge.style.display = res.data.resend_configured ? 'inline-block' : 'none';
+		}
+	} catch (e) {
+		showAlert('settings-alert', 'Failed to load settings', 'error');
+	}
+}
+
+async function saveAdminSettings() {
+	const btn = document.getElementById('btn-save-settings');
+	const originalText = btn.innerHTML;
+	btn.innerHTML = '<span class="spinner"></span> Saving...';
+	btn.disabled = true;
+
+	const apiKey = document.getElementById('admin-resend-api-key').value;
+	try {
+		const res = await API.put('/api/admin/settings', { resend_api_key: apiKey });
+		if (res.ok) {
+			showAlert('settings-alert', 'Settings saved securely!', 'success');
+			loadAdminSettings();
+		} else {
+			showAlert('settings-alert', res.data?.error || 'Failed to save', 'error');
+		}
+	} catch (e) {
+		showAlert('settings-alert', e.message, 'error');
+	} finally {
+		btn.innerHTML = originalText;
+		btn.disabled = false;
+	}
+}
+
+	</script>
+{% endblock %}

@@ -1,0 +1,443 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}EventRes | Event Details Page{% endblock %}
+
+{% block stylesheets %}
+<style>
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: 2rem 0 0;
+    transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--text); }
+
+  .event-layout {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 3rem;
+    padding: 2.5rem 0 4rem;
+    align-items: start;
+  }
+
+  @media (max-width: 768px) {
+    .event-layout { grid-template-columns: 1fr; }
+  }
+
+  .event-main {
+    min-width: 0; /* Prevents flex/grid blowouts */
+  }
+
+  .event-tag {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 1rem;
+  }
+
+  .event-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+  }
+
+  .event-description {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 2rem;
+  }
+
+  .event-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  /* CAROUSEL */
+  .carousel-container {
+    margin-bottom: 2rem;
+  }
+  .carousel-main {
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--surface2);
+    height: clamp(240px, 40vh, 400px);
+    margin-bottom: 0.75rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .carousel-main img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.2s ease-in-out;
+  }
+  .carousel-main img.fade-out {
+    opacity: 0;
+  }
+  .carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-size: 1.2rem;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .carousel-btn:hover { background: var(--amber); }
+  .prev-btn { left: 1rem; }
+  .next-btn { right: 1rem; }
+
+  .carousel-thumbs {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 0.5rem;
+  }
+  .carousel-thumbs::-webkit-scrollbar { display: none; }
+  
+  .carousel-thumb {
+    width: 80px;
+    height: 56px;
+    border-radius: 6px;
+    object-fit: cover;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: all 0.2s;
+    border: 2px solid transparent;
+    flex-shrink: 0;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .carousel-thumb:hover { opacity: 0.8; }
+  .carousel-thumb.active {
+    opacity: 1;
+    border-color: var(--amber);
+  }
+
+  .meta-item {
+    background: var(--surface);
+    padding: 1rem 1.25rem;
+  }
+
+  .meta-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.3rem;
+  }
+
+  .meta-value {
+    font-size: 0.85rem;
+    color: var(--text);
+  }
+
+  /* RESERVATION PANEL */
+  .reservation-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    position: sticky;
+    top: 72px;
+  }
+
+  .panel-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .panel-seats {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .success-state {
+    text-align: center;
+    padding: 1.5rem 0;
+    display: none;
+  }
+
+  .success-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .success-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--green);
+    margin-bottom: 0.5rem;
+  }
+
+  .success-msg {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  #loading-state { text-align: center; padding: 4rem; color: var(--text-muted); }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+  <a href="{{ path('app_home') }}" class="back-link fade-up">← Back to events</a>
+
+  <div id="loading-state"><span class="spinner"></span></div>
+
+  <div id="event-content" style="display:none">
+    <div class="event-layout">
+      <div class="event-main fade-up fade-up-1">
+        <div class="event-tag" id="event-date"></div>
+        <h1 class="event-title" id="event-title"></h1>
+        
+        <div class="carousel-container" id="event-carousel" style="display:none">
+          <div class="carousel-main">
+            <button class="carousel-btn prev-btn" id="carousel-prev" onclick="prevImage()">❮</button>
+            <img id="carousel-main-img" src="" alt="Event Image">
+            <button class="carousel-btn next-btn" id="carousel-next" onclick="nextImage()">❯</button>
+          </div>
+          <div class="carousel-thumbs" id="carousel-thumbs"></div>
+        </div>
+        
+        <p class="event-description" id="event-description"></p>
+
+        <div class="event-meta-grid">
+          <div class="meta-item">
+            <div class="meta-label">Location</div>
+            <div class="meta-value" id="event-location"></div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">Total Seats</div>
+            <div class="meta-value" id="event-seats"></div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">Available</div>
+            <div class="meta-value" id="event-available"></div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">Status</div>
+            <div class="meta-value" id="event-status"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fade-up fade-up-2">
+        <div class="reservation-panel">
+          <div class="panel-title">Reserve a Spot</div>
+          <div class="panel-seats" id="panel-seats-text"></div>
+
+          <div id="alert-reserve" class="alert"></div>
+
+          <div id="reservation-form">
+            <div class="form-group">
+              <label for="r-name">Full Name</label>
+              <input type="text" id="r-name" placeholder="Your name">
+            </div>
+            <div class="form-group">
+              <label for="r-email">Email</label>
+              <input type="email" id="r-email" placeholder="your@email.com">
+            </div>
+            <div class="form-group">
+              <label for="r-phone">Phone</label>
+              <input type="tel" id="r-phone" placeholder="+216 XX XXX XXX">
+            </div>
+            <button class="btn btn-primary btn-full" id="reserve-btn" onclick="submitReservation()">
+              Confirm Reservation
+            </button>
+          </div>
+
+          <div class="success-state" id="success-state">
+            <div class="success-icon">✓</div>
+            <div class="success-title">Reservation Confirmed!</div>
+            <p class="success-msg" id="success-msg"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+let currentEventId = {{ id }};
+let currentImages = [];
+let currentImageIndex = 0;
+
+async function loadEvent() {
+  if (!currentEventId) { window.location.href = '/'; return; }
+
+  const res = await API.get(`/api/events/${currentEventId}`);
+  document.getElementById('loading-state').style.display = 'none';
+
+  if (!res.ok) { window.location.href = '/'; return; }
+
+  const e = res.data;
+  document.title = `EventRes — ${e.title}`;
+  document.getElementById('event-date').textContent = formatDate(e.date);
+  document.getElementById('event-title').textContent = e.title;
+  
+  if (e.images && e.images.length > 0) {
+    currentImages = e.images;
+    currentImageIndex = 0;
+    document.getElementById('event-carousel').style.display = 'block';
+    
+    document.getElementById('carousel-prev').style.display = currentImages.length > 1 ? 'flex' : 'none';
+    document.getElementById('carousel-next').style.display = currentImages.length > 1 ? 'flex' : 'none';
+    document.getElementById('carousel-thumbs').style.display = 'flex';
+    
+    renderCarousel();
+  } else {
+    document.getElementById('event-carousel').style.display = 'block';
+    document.getElementById('carousel-main-img').src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400"><rect width="800" height="400" fill="%232a2a2a"/><text x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-size="80" fill="%23666">📅</text></svg>';
+    document.getElementById('carousel-prev').style.display = 'none';
+    document.getElementById('carousel-next').style.display = 'none';
+    document.getElementById('carousel-thumbs').style.display = 'none';
+  }
+
+  document.getElementById('event-description').textContent = e.description;
+  document.getElementById('event-location').textContent = e.location;
+  document.getElementById('event-seats').textContent = e.seats;
+  document.getElementById('event-available').textContent = e.available_seats;
+
+  const sold = e.available_seats === 0;
+  document.getElementById('event-status').innerHTML = sold
+    ? '<span class="badge badge-red">Sold out</span>'
+    : '<span class="badge badge-green">Open</span>';
+
+  document.getElementById('panel-seats-text').textContent =
+    sold ? 'This event is sold out.' : `${e.available_seats} of ${e.seats} seats remaining`;
+
+  if (sold) {
+    document.getElementById('reserve-btn').disabled = true;
+  }
+
+  const user = API.user();
+  if (user) document.getElementById('r-email').value = user.email;
+
+  document.getElementById('event-content').style.display = 'block';
+}
+
+function renderCarousel() {
+  const mainImg = document.getElementById('carousel-main-img');
+  
+  if (mainImg.src && mainImg.src !== window.location.href) {
+    mainImg.classList.add('fade-out');
+    setTimeout(() => {
+      mainImg.src = currentImages[currentImageIndex].url;
+      mainImg.classList.remove('fade-out');
+    }, 200);
+  } else {
+    // Initial render without delay
+    mainImg.src = currentImages[currentImageIndex].url;
+  }
+  
+  const thumbsContainer = document.getElementById('carousel-thumbs');
+  thumbsContainer.innerHTML = currentImages.map((img, i) => `
+    <img src="${img.url}" class="carousel-thumb ${i === currentImageIndex ? 'active' : ''}" onclick="setCarouselImage(${i})" alt="Thumbnail">
+  `).join('');
+  
+  // Auto scroll thumb into view
+  const activeThumb = thumbsContainer.querySelector('.active');
+  if (activeThumb) {
+    activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
+}
+
+function setCarouselImage(index) {
+  currentImageIndex = index;
+  renderCarousel();
+}
+
+function prevImage() {
+  currentImageIndex = (currentImageIndex - 1 + currentImages.length) % currentImages.length;
+  renderCarousel();
+}
+
+function nextImage() {
+  currentImageIndex = (currentImageIndex + 1) % currentImages.length;
+  renderCarousel();
+}
+
+// Enable mouse wheel horizontal scrolling on thumbnails
+const thumbsContainerEl = document.getElementById('carousel-thumbs');
+if (thumbsContainerEl) {
+  thumbsContainerEl.addEventListener('wheel', (e) => {
+    if (e.deltaY !== 0) {
+      e.preventDefault();
+      thumbsContainerEl.scrollBy({
+        left: e.deltaY > 0 ? 100 : -100,
+        behavior: 'smooth'
+      });
+    }
+  });
+}
+
+async function submitReservation() {
+  const name = document.getElementById('r-name').value.trim();
+  const email = document.getElementById('r-email').value.trim();
+  const phone = document.getElementById('r-phone').value.trim();
+
+  if (!name || !email || !phone) {
+    showAlert('alert-reserve', 'Please fill all fields.', 'error'); return;
+  }
+
+  const btn = document.getElementById('reserve-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Confirming...';
+
+  const res = await API.post('/api/reservations', {
+    event_id: parseInt(currentEventId),
+    name, email, phone
+  });
+
+  btn.disabled = false;
+  btn.innerHTML = 'Confirm Reservation';
+
+  if (res.ok) {
+    document.getElementById('reservation-form').style.display = 'none';
+    document.getElementById('success-state').style.display = 'block';
+    document.getElementById('success-msg').textContent =
+      `Confirmation sent to ${email}. See you there!`;
+  } else {
+    showAlert('alert-reserve', res.data.error || 'Reservation failed.', 'error');
+  }
+}
+
+loadEvent();
+</script>
+{% endblock %}
