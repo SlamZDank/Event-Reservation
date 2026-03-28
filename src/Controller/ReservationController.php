@@ -53,7 +53,7 @@ class ReservationController extends AbstractController
             $reservation->setUser($this->getUser());
         }
 
-        // Check for Resend API key and send email
+        // check key and mail
         $resendApiKey = $this->settingRepo->getValue('RESEND_API_KEY');
         if ($resendApiKey && $email) {
             try {
@@ -79,7 +79,7 @@ class ReservationController extends AbstractController
             }
         }
 
-        // Only persist if email succeeds (or if email isn't configured)
+        // save only if email sent or missing
         $this->em->persist($reservation);
         $this->em->flush();
 

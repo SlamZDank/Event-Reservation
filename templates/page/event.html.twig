@@ -362,7 +362,7 @@ function renderCarousel() {
       mainImg.classList.remove('fade-out');
     }, 200);
   } else {
-    // Initial render without delay
+    // first render no delay
     mainImg.src = currentImages[currentImageIndex].url;
   }
   
@@ -371,7 +371,7 @@ function renderCarousel() {
     <img src="${img.url}" class="carousel-thumb ${i === currentImageIndex ? 'active' : ''}" onclick="setCarouselImage(${i})" alt="Thumbnail">
   `).join('');
   
-  // Auto scroll thumb into view
+  // auto scroll thumb
   const activeThumb = thumbsContainer.querySelector('.active');
   if (activeThumb) {
     activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
@@ -393,7 +393,7 @@ function nextImage() {
   renderCarousel();
 }
 
-// Enable mouse wheel horizontal scrolling on thumbnails
+// mouse wheel scroll thumbs
 const thumbsContainerEl = document.getElementById('carousel-thumbs');
 if (thumbsContainerEl) {
   thumbsContainerEl.addEventListener('wheel', (e) => {

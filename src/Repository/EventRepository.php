@@ -19,7 +19,7 @@ class EventRepository extends ServiceEntityRepository
 
         $now = new \DateTimeImmutable();
 
-        // Status filter takes priority over onlyUpcoming
+        // status beats onlyUpcoming rule
         if ($status === 'passed') {
             $qb->andWhere('e.endDate < :now')->setParameter('now', $now);
             $countQb->andWhere('e.endDate < :now')->setParameter('now', $now);
@@ -30,12 +30,12 @@ class EventRepository extends ServiceEntityRepository
             $qb->andWhere('e.date > :now')->setParameter('now', $now);
             $countQb->andWhere('e.date > :now')->setParameter('now', $now);
         } elseif ($onlyUpcoming) {
-            // Default for public: show ongoing + upcoming
+            // public sees ongoing and upcoming
             $qb->andWhere('e.endDate >= :now')->setParameter('now', $now);
             $countQb->andWhere('e.endDate >= :now')->setParameter('now', $now);
         }
 
-        // Search filter
+        // filter query
         if ($search !== '') {
             $searchLower = mb_strtolower($search);
             $qb->andWhere('LOWER(e.title) LIKE :search OR LOWER(e.location) LIKE :search OR LOWER(e.description) LIKE :search')
@@ -44,7 +44,7 @@ class EventRepository extends ServiceEntityRepository
                     ->setParameter('search', '%' . $searchLower . '%');
         }
 
-        // Upcoming sorts ASC (closest first), Past/All sorts DESC (newest first)
+        // sort ASC upcoming, DESC past
         $qb->orderBy('e.date', $onlyUpcoming ? 'ASC' : 'DESC');
 
         $total = $countQb->getQuery()->getSingleScalarResult();

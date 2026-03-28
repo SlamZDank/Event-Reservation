@@ -34,7 +34,7 @@ class EventController extends AbstractController
         $search = trim($request->query->getString('search', ''));
         $status = trim($request->query->getString('status', ''));
 
-        // Security: Only admins can view past events via the 'all' flag
+        // admins only for past events
         if ($all && !$this->isGranted('ROLE_ADMIN')) {
             $all = false; 
         }
@@ -108,8 +108,7 @@ class EventController extends AbstractController
         $event = $this->eventRepo->find($id);
         if (!$event) return $this->json(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
 
-        // Files are deleted automatically if we set up an event listener,
-        // but for simplicity we can just delete from disk here.
+        // delete files directly
         $uploadDir = $this->params->get('uploads_dir');
         foreach ($event->getImages() as $img) {
             $filePath = $uploadDir . '/' . $img->getFilename();
@@ -144,7 +143,7 @@ class EventController extends AbstractController
         foreach ($files as $file) {
             $ext = $file->guessExtension();
             if (!in_array($ext, ['jpeg', 'jpg', 'png', 'webp'])) {
-                continue; // invalid format
+                continue; // bad format
             }
 
             $newFilename = uniqid() . '.' . $ext;

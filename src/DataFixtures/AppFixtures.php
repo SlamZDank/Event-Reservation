@@ -14,7 +14,7 @@ class AppFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
-        // 1. Create Core Users
+        // 1. make sys users
         $admin = new User();
         $admin->setEmail('admin@event.com');
         $admin->setRoles(['ROLE_ADMIN', 'ROLE_USER']);
@@ -26,7 +26,7 @@ class AppFixtures extends Fixture
         $mainUser->setPassword($this->hasher->hashPassword($mainUser, 'user123'));
         $manager->persist($mainUser);
 
-        // 2. Generate Dummy Users
+        // 2. make test users
         $users = [$mainUser];
         for ($i = 1; $i <= 60; $i++) {
             $u = new User();
@@ -36,7 +36,7 @@ class AppFixtures extends Fixture
             $users[] = $u;
         }
 
-        // 3. Generate 60 Events
+        // 3. make 60 events
         $events = [];
         $topics = ['AI Summit', 'React Workshop', 'Symfony Days', 'Docker Masterclass', 'Cybersecurity Basics', 'Startup Pitch', 'Blockchain 101', 'Cloud Native Meetup', 'Python Bootcamp', 'UX Design Session'];
         $locations = ['ISSAT Amphitheater', 'Sousse Tech Hub', 'Online (Zoom)', 'Sousse Novotel', 'Campus Library'];
@@ -48,7 +48,7 @@ class AppFixtures extends Fixture
             $event->setTitle($topic . ' ' . $i);
             $event->setDescription("Join us for an exciting day exploring topics around {$topic}. Bring your laptop and questions!");
             
-            // Random dates between -30 days and +180 days
+            // dates span -30d to +180d
             $daysOffset = rand(-30, 180);
             $date = new \DateTimeImmutable();
             $date = $date->modify(($daysOffset >= 0 ? '+' : '') . $daysOffset . ' days');
@@ -56,32 +56,32 @@ class AppFixtures extends Fixture
             
             $event->setDate($date);
             
-            // End date is 1-8 hours after start
+            // end 1-8h later
             $durationHours = rand(1, 8);
             $event->setEndDate($date->modify("+{$durationHours} hours"));
             
             $event->setLocation($locations[array_rand($locations)]);
             
-            // Random seats between 5 and 150
+            // seats 5 to 150
             $event->setSeats(rand(5, 150));
             
             $manager->persist($event);
             $events[] = $event;
         }
 
-        // 4. Generate Exactly 60 Random Reservations
-        // We have 60 events, we can just assign 1 reservation to each event
+        // 4. make 60 random books
+        // 1 book per event
         for ($i = 0; $i < 60; $i++) {
             $event = $events[$i];
             
-            // Randomly select a user for the reservation
+            // pick random user
             $randomUser = $users[array_rand($users)];
             
             $res = new Reservation();
             $res->setEvent($event);
             $res->setUser($randomUser);
             
-            // Set required fields based on the selected user
+            // set user fields
             $email = $randomUser->getEmail();
             $nameParts = explode('@', $email);
             $res->setName(ucfirst($nameParts[0]));

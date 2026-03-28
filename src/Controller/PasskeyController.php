@@ -78,11 +78,11 @@ class PasskeyController extends AbstractController
 
         $options = $this->creationOptionsFactory->create('default', $userEntity, []);
 
-        // Store options in cache keyed by a unique challenge token (stateless-friendly)
+        // cache options by token
         $challengeToken = bin2hex(random_bytes(32));
         $cacheItem = $this->cache->getItem('webauthn_reg_' . $challengeToken);
         $cacheItem->set(serialize($options));
-        $cacheItem->expiresAfter(300); // 5 minutes
+        $cacheItem->expiresAfter(300); // expires in 5m
         $this->cache->save($cacheItem);
 
         $rpEntity = $options->rp;
@@ -126,7 +126,7 @@ class PasskeyController extends AbstractController
             return $this->json(['error' => 'Missing challengeToken'], Response::HTTP_BAD_REQUEST);
         }
 
-        // Retrieve options from cache
+        // get options
         $cacheKey = 'webauthn_reg_' . $challengeToken;
         $cacheItem = $this->cache->getItem($cacheKey);
 
@@ -137,7 +137,7 @@ class PasskeyController extends AbstractController
         $options = unserialize($cacheItem->get());
 
         try {
-            // Remove challengeToken before deserializing as PublicKeyCredential
+            // drop token before deser
             unset($body['challengeToken']);
             $credentialJson = json_encode($body);
             
@@ -175,7 +175,7 @@ class PasskeyController extends AbstractController
 
             $this->credentialRepo->saveCredentialForUser($user, $credentialSource);
             
-            // Delete the challenge from cache (one-time use)
+            // kill used challenge
             $this->cache->deleteItem($cacheKey);
 
             $token = $this->jwtManager->create($user);
@@ -198,11 +198,11 @@ class PasskeyController extends AbstractController
     {
         $options = $this->requestOptionsFactory->create('default', []);
 
-        // Store options in cache keyed by a unique challenge token
+        // cache options by token
         $challengeToken = bin2hex(random_bytes(32));
         $cacheItem = $this->cache->getItem('webauthn_login_' . $challengeToken);
         $cacheItem->set(serialize($options));
-        $cacheItem->expiresAfter(300); // 5 minutes
+        $cacheItem->expiresAfter(300); // expires in 5m
         $this->cache->save($cacheItem);
 
         $json = json_encode([
@@ -227,7 +227,7 @@ class PasskeyController extends AbstractController
             return $this->json(['error' => 'Missing challengeToken'], Response::HTTP_BAD_REQUEST);
         }
 
-        // Retrieve options from cache
+        // get options
         $cacheKey = 'webauthn_login_' . $challengeToken;
         $cacheItem = $this->cache->getItem($cacheKey);
 
@@ -238,7 +238,7 @@ class PasskeyController extends AbstractController
         $options = unserialize($cacheItem->get());
 
         try {
-            // Remove challengeToken before deserializing
+            // drop token before deser
             unset($body['challengeToken']);
             $credentialJson = json_encode($body);
             
@@ -273,7 +273,7 @@ class PasskeyController extends AbstractController
             $entity->setLastUsedAt(new \DateTimeImmutable());
             $this->em->flush();
 
-            // Delete the challenge from cache (one-time use)
+            // kill used challenge
             $this->cache->deleteItem($cacheKey);
 
             $user = $entity->getUser();

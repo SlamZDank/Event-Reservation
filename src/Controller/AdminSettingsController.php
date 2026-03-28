@@ -22,7 +22,7 @@ class AdminSettingsController extends AbstractController
 
         $resendApiKey = $this->settingRepo->getValue('RESEND_API_KEY');
         
-        // Mask the API key for security if it exists, but show enough to know it's there
+        // mask key but keep prefix visible
         $maskedResendKey = '';
         if ($resendApiKey) {
             if (strlen($resendApiKey) > 12) {
@@ -47,12 +47,11 @@ class AdminSettingsController extends AbstractController
 
         if (isset($data['resend_api_key'])) {
             $key = trim($data['resend_api_key']);
-            // Only update if it's not empty, or if an explicit clear is requested (maybe later)
-            // But if it's exactly the masked string, ignore it.
+            // skip exact masked string, update otherwise
             if ($key !== '' && !str_contains($key, '...')) {
                 $this->settingRepo->setValue('RESEND_API_KEY', $key);
             } elseif ($key === '') {
-                // Clear it
+                // drop key
                 $this->settingRepo->setValue('RESEND_API_KEY', null);
             }
         }

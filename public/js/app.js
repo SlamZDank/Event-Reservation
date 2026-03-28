@@ -1,4 +1,4 @@
-// ── API ──────────────────────────────────────────────
+// api calls
 const API = {
   base: '',
 
@@ -36,7 +36,7 @@ const API = {
   delete(path) { return this.fetch(path, { method: 'DELETE' }); },
 };
 
-// ── NAV ──────────────────────────────────────────────
+// nav logic
 function renderNav() {
   const user = API.user();
   const settingsLi = document.getElementById('nav-settings-li');
@@ -61,7 +61,7 @@ function logout() {
   window.location.href = '/login';
 }
 
-// ── ALERTS ───────────────────────────────────────────
+// alerts
 function showAlert(id, message, type = 'error') {
   const el = document.getElementById(id);
   if (!el) return;
@@ -70,7 +70,7 @@ function showAlert(id, message, type = 'error') {
   setTimeout(() => el.classList.remove('show'), 5000);
 }
 
-// ── PASSKEY HELPERS ───────────────────────────────────
+// passkey helpers
 function bufferToBase64Url(buffer) {
   const bytes = new Uint8Array(buffer);
   let str = '';
@@ -158,13 +158,13 @@ async function loginPasskey() {
   return verifyRes.data;
 }
 
-// ── FORMAT DATE ───────────────────────────────────────
+// date format
 function formatDate(dateStr) {
   const d = new Date(dateStr.replace(' ', 'T'));
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
-// ── THEME ──────────────────────────────────────────────
+// theme logic
 function toggleTheme() {
   const current = document.documentElement.getAttribute('data-theme') || 'dark';
   const next = current === 'light' ? 'dark' : 'light';
@@ -175,7 +175,7 @@ function toggleTheme() {
 const savedTheme = localStorage.getItem('theme') || 'dark';
 document.documentElement.setAttribute('data-theme', savedTheme);
 
-// ── DYNAMIC SHAPES ─────────────────────────────────────
+// shape logic
 function initDynamicShapes() {
   const bg = document.querySelector('.m3-bg');
   if (!bg) return;
@@ -185,7 +185,7 @@ function initDynamicShapes() {
     const shape = shapes[Math.floor(Math.random() * shapes.length)];
     el.className = `shape ${shape}`;
     
-    // Randomize properties
+    // random props
     const size = 20 + Math.random() * 40;
     if (shape === 'shape-triangle') {
       const half = size / 2;
@@ -203,7 +203,7 @@ function initDynamicShapes() {
     el.style.animationDuration = `${25 + Math.random() * 45}s`;
     el.style.animationDelay = `-${Math.random() * 40}s`;
     
-    // Vary opacity and spin directions randomly
+    // random spin/fade
     el.style.opacity = 0.05 + Math.random() * 0.1;
     if (Math.random() > 0.5) el.style.animationDirection = 'alternate-reverse';
 
@@ -211,7 +211,7 @@ function initDynamicShapes() {
   }
 }
 
-// ── SETTINGS MODAL ───────────────────────────────────
+// settings modal
 function openSettingsModal() {
   const user = API.user();
   

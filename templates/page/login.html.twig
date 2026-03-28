@@ -214,14 +214,14 @@
 
       <div id="alert-login" class="alert"></div>
 
-      {# TABS #}
+      {# tabs #}
       <div class="tab-group">
         <button class="tab-btn active" onclick="switchTab('password')">Password</button>
         <button class="tab-btn" onclick="switchTab('passkey')">Passkey</button>
         <button class="tab-btn" onclick="switchTab('register')">Register</button>
       </div>
 
-      {# PASSWORD LOGIN #}
+      {# pw login #}
       <div id="tab-password" class="tab-pane active">
         <div class="form-group">
           <label for="login-email">Email</label>
@@ -236,7 +236,7 @@
         </button>
       </div>
 
-      {# PASSKEY LOGIN #}
+      {# passkey #}
       <div id="tab-passkey" class="tab-pane">
         <button class="passkey-btn" onclick="doPasskeyLogin()">
           <div class="passkey-icon">🔑</div>
@@ -255,7 +255,7 @@
         </button>
       </div>
 
-      {# REGISTER #}
+      {# register #}
       <div id="tab-register" class="tab-pane">
         <div class="form-group">
           <label for="reg-email">Email</label>
@@ -280,7 +280,7 @@
 
 {% block javascripts %}
 <script>
-  // Redirect if already logged in
+  // redirect if logged in
   if (API.token() && API.user()) {
     document.querySelector('.auth-form-area').innerHTML = `
       <div class="auth-box fade-up">
@@ -304,7 +304,7 @@
     const currentActive = document.querySelector('.tab-pane.active');
     const nextPane = document.getElementById(`tab-${tab}`);
     
-    // Update button states immediately
+    // update btns fast
     document.querySelectorAll('.tab-btn').forEach((btn, i) => {
       const tabs = ['password', 'passkey', 'register'];
       btn.classList.toggle('active', tabs[i] === tab);
@@ -320,7 +320,7 @@
         currentActive.classList.remove('fading-out');
         nextPane.classList.add('active');
         isAnimating = false;
-      }, 150); // wait for fade out
+      }, 150); // wait fade out
     } else if (!currentActive) {
       nextPane.classList.add('active');
     }

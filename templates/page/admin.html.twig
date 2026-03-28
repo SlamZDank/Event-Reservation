@@ -341,7 +341,7 @@
 {% block body %}
 	<div
 		class="admin-layout">
-		{# SIDEBAR Area #}
+		{# sidebar #}
 		<aside class="sidebar" id="admin-sidebar">
 			<button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle Sidebar">≡</button>
 			<div class="sidebar-label">Management</div>
@@ -362,7 +362,7 @@
 		<main
 			class="main">
 
-			{# EVENTS Area #}
+			{# events #}
 			<div id="section-events" class="section-page active">
 				<div class="page-header">
 					<div>
@@ -434,7 +434,7 @@
 				</div>
 			</div>
 
-			{# RESERVATIONS Area #}
+			{# reservations #}
 			<div id="section-reservations" class="section-page">
 				<div class="page-header">
 					<div>
@@ -477,7 +477,7 @@
 				</div>
 			</div>
 
-			{# SETTINGS Area #}
+			{# settings #}
 			<div id="section-settings" class="section-page">
 				<div class="page-header">
 					<div>
@@ -504,7 +504,7 @@
 		</main>
 	</div>
 
-	{# Create / Edit Modal #}
+	{# form modal #}
 	<div class="modal-backdrop" id="event-modal">
 		<div class="modal">
 			<div class="modal-title" id="modal-title">New Event</div>
@@ -551,7 +551,7 @@
 		</div>
 	</div>
 
-	{# View Modal #}
+	{# view modal #}
 	<div class="modal-backdrop" id="view-modal">
 		<div class="modal">
 			<div class="modal-title" id="view-modal-title">Event Details</div>
@@ -566,7 +566,7 @@
 		</div>
 	</div>
 
-	{# Delete Confirmation Modal #}
+	{# delete modal #}
 	<div class="modal-backdrop" id="delete-modal">
 		<div class="modal" style="max-width:360px">
 			<div class="modal-title">Delete Event?</div>
@@ -633,7 +633,7 @@ labels[status] || status
 }</span>`;
 }
 
-// EVENTS
+// events
 async function loadEvents(page = 1) {
 currentAdminPage = page;
 document.getElementById('events-table-loading').style.display = 'block';
@@ -661,7 +661,7 @@ const meta = res.data ?. meta || {
 total: 0
 };
 
-// Statistics
+// stats
 const total = meta.total || 0;
 const upcoming = events.filter(e => e.status === 'upcoming').length;
 const ongoing = events.filter(e => e.status === 'ongoing').length;
@@ -676,7 +676,7 @@ document.getElementById('events-empty').style.display = 'block';
 return;
 }
 
-// Events List
+// events list
 const tbody = document.getElementById('events-tbody');
 tbody.innerHTML = '';
 events.forEach(e => {
@@ -726,7 +726,7 @@ meta.total
 }
 }
 
-// Load ALL events for the reservation dropdown (unpaginated)
+// get all events for dropdown
 async function loadAllEventsForSelect() {
 const res = await API.get('/api/events?all=true&limit=1000');
 allEventsForSelect = res.data ?. data || [];
@@ -899,7 +899,7 @@ return;
 
 closeModal();
 loadEvents(currentAdminPage);
-allEventsForSelect = []; // reset so dropdown reloads
+allEventsForSelect = []; // reset dropdown
 } else {
 showAlert('alert-modal', res.data.error || 'Failed to save.', 'error');
 } btn.disabled = false;
@@ -937,7 +937,7 @@ loadEvents(currentAdminPage);
 };
 }
 
-// Reservations
+// reservations
 async function loadReservations() {
 const id = document.getElementById('event-select').value;
 if (! id) {
@@ -991,7 +991,7 @@ tbody.appendChild(tr);
 document.getElementById('res-table').style.display = 'table';
 }
 
-// Close modals
+// close modals
 document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
 backdrop.addEventListener('click', e => {
 if (e.target === backdrop) 
@@ -1000,7 +1000,7 @@ backdrop.classList.remove('open');
 });
 });
 
-// Dropzone Drag and Drop
+// dropzone
 const dropzone = document.getElementById('m-dropzone');
 if (dropzone) {
 dropzone.addEventListener('dragover', (e) => {
@@ -1020,13 +1020,13 @@ updateLocalPreview(document.getElementById('m-images'));
 }
 
 function updateLocalPreview(input) {
-// Only handle new local preview
-// Existing images are rendered differently during edit
+// preview new local
+// existing imgs render diff
 if (! input.files || input.files.length === 0) 
 return;
 
 
-// Create a separate container for new uploads to not overwrite existing images
+// separate box for new uploads
 let newPreview = document.getElementById('m-new-preview');
 if (! newPreview) {
 newPreview = document.createElement('div');
@@ -1053,7 +1053,7 @@ reader.readAsDataURL(file);
 
 loadEvents();
 loadAllEventsForSelect();
-// SETTINGS LOGIC
+// settings logic
 async function loadAdminSettings() {
 	try {
 		const res = await API.get('/api/admin/settings');
