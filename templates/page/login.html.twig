@@ -1,0 +1,393 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Signup or Login to EventRes{% endblock %}
+
+
+
+{% block stylesheets %}
+<style>
+  body { display: flex; flex-direction: column; min-height: 100vh; }
+
+  .auth-layout {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: calc(100vh - 56px);
+  }
+
+  @media (max-width: 720px) {
+    .auth-layout { grid-template-columns: 1fr; }
+    .auth-side { display: none; }
+  }
+
+  .auth-side {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .auth-side-quote {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 2rem;
+    line-height: 1.3;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+  }
+
+  .auth-side-quote em { color: var(--amber); font-style: normal; }
+
+  .auth-side-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+
+  .auth-grid {
+    display: grid;
+    grid-template-rows: repeat(6, 1fr);
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    position: absolute;
+    inset: 0;
+    opacity: 0.15;
+    z-index: 0;
+  }
+
+  .auth-cell { background: var(--surface); }
+  .auth-cell:nth-child(3n) { background: var(--surface2); }
+
+  .auth-side-content { position: relative; z-index: 1; }
+
+  .auth-form-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+  }
+
+  .auth-box {
+    width: 100%;
+    max-width: 380px;
+  }
+
+  .auth-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .auth-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+  }
+
+  .passkey-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1.25rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    margin-bottom: 0.75rem;
+  }
+
+  .passkey-btn:hover {
+    border-color: var(--amber);
+    background: rgba(245,166,35,0.04);
+  }
+
+  .passkey-icon {
+    width: 28px; height: 28px;
+    background: var(--amber);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  .passkey-text { text-align: left; }
+  .passkey-title { display: block; font-weight: 400; }
+  .passkey-desc { display: block; font-size: 0.65rem; color: var(--text-muted); margin-top: 0.1rem; }
+
+  .auth-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .auth-footer a { color: var(--amber); text-decoration: none; }
+  .auth-footer a:hover { text-decoration: underline; }
+
+  .tab-group {
+    display: flex;
+    gap: 0;
+    margin-bottom: 1.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 0.6rem;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .tab-btn.active {
+    background: var(--amber);
+    color: var(--black);
+  }
+
+  .tab-pane {
+    display: none;
+    opacity: 0;
+  }
+  
+  .tab-pane.active {
+    display: block;
+    animation: swipeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .tab-pane.fading-out {
+    display: block;
+    animation: swipeOut 0.15s ease forwards;
+  }
+
+  @keyframes swipeIn {
+    from { opacity: 0; transform: translateX(10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes swipeOut {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(-10px); }
+  }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="auth-layout">
+  <div class="auth-side" style="position:relative; overflow:hidden;">
+    <div class="auth-grid">
+      <div class="auth-cell"></div><div class="auth-cell"></div><div class="auth-cell"></div><div class="auth-cell"></div>
+      <div class="auth-cell"></div><div class="auth-cell"></div><div class="auth-cell"></div><div class="auth-cell"></div>
+      <div class="auth-cell"></div><div class="auth-cell"></div><div class="auth-cell"></div><div class="auth-cell"></div>
+      <div class="auth-cell"></div><div class="auth-cell"></div><div class="auth-cell"></div><div class="auth-cell"></div>
+      <div class="auth-cell"></div><div class="auth-cell"></div><div class="auth-cell"></div><div class="auth-cell"></div>
+      <div class="auth-cell"></div><div class="auth-cell"></div><div class="auth-cell"></div><div class="auth-cell"></div>
+    </div>
+    <div class="auth-side-content">
+      <p class="auth-side-quote">Secure access<br>with <em>modern</em><br>authentication.</p>
+      <p class="auth-side-sub">JWT + Passkeys — ISSAT Sousse 2026</p>
+    </div>
+  </div>
+
+  <div class="auth-form-area">
+    <div class="auth-box fade-up">
+      <h1 class="auth-title">Welcome back</h1>
+      <p class="auth-sub">Sign in to your account to manage reservations.</p>
+
+      <div id="alert-login" class="alert"></div>
+
+      {# TABS #}
+      <div class="tab-group">
+        <button class="tab-btn active" onclick="switchTab('password')">Password</button>
+        <button class="tab-btn" onclick="switchTab('passkey')">Passkey</button>
+        <button class="tab-btn" onclick="switchTab('register')">Register</button>
+      </div>
+
+      {# PASSWORD LOGIN #}
+      <div id="tab-password" class="tab-pane active">
+        <div class="form-group">
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')loginPassword()">
+        </div>
+        <button class="btn btn-primary btn-full" id="login-btn" onclick="loginPassword()">
+          Sign In
+        </button>
+      </div>
+
+      {# PASSKEY LOGIN #}
+      <div id="tab-passkey" class="tab-pane">
+        <button class="passkey-btn" onclick="doPasskeyLogin()">
+          <div class="passkey-icon">🔑</div>
+          <div class="passkey-text">
+            <span class="passkey-title">Sign in with Passkey</span>
+            <span class="passkey-desc">Use biometrics or security key</span>
+          </div>
+        </button>
+        <div class="divider">or register a passkey</div>
+        <div class="form-group">
+          <label for="passkey-email">Email</label>
+          <input type="email" id="passkey-email" placeholder="your@email.com">
+        </div>
+        <button class="btn btn-outline btn-full" onclick="doPasskeyRegister()">
+          Register Passkey
+        </button>
+      </div>
+
+      {# REGISTER #}
+      <div id="tab-register" class="tab-pane">
+        <div class="form-group">
+          <label for="reg-email">Email</label>
+          <input type="email" id="reg-email" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label for="reg-password">Password</label>
+          <input type="password" id="reg-password" placeholder="Min. 8 characters">
+        </div>
+        <button class="btn btn-primary btn-full" id="reg-btn" onclick="doRegister()">
+          Create Account
+        </button>
+      </div>
+
+      <p class="auth-footer">
+        <a href="{{ path('app_home') }}">← Back to events</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+  // Redirect if already logged in
+  if (API.token() && API.user()) {
+    document.querySelector('.auth-form-area').innerHTML = `
+      <div class="auth-box fade-up">
+        <h1 class="auth-title">You're logged in!</h1>
+        <p class="auth-sub" style="margin-bottom:1.5rem">Logged in as ${API.user().email}</p>
+        <div id="alert-login" class="alert"></div>
+        <button class="btn btn-outline btn-full" onclick="doPasskeyRegister()" style="margin-bottom:0.75rem">
+          Add Passkey Device
+        </button>
+        <button class="btn btn-primary btn-full" onclick="window.location.href='/'">
+          Continue to Events
+        </button>
+      </div>
+    `;
+  }
+
+  let isAnimating = false;
+  function switchTab(tab) {
+    if (isAnimating) return;
+    
+    const currentActive = document.querySelector('.tab-pane.active');
+    const nextPane = document.getElementById(`tab-${tab}`);
+    
+    // Update button states immediately
+    document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+      const tabs = ['password', 'passkey', 'register'];
+      btn.classList.toggle('active', tabs[i] === tab);
+    });
+    document.getElementById('alert-login').classList.remove('show');
+    
+    if (currentActive && currentActive !== nextPane) {
+      isAnimating = true;
+      currentActive.classList.remove('active');
+      currentActive.classList.add('fading-out');
+      
+      setTimeout(() => {
+        currentActive.classList.remove('fading-out');
+        nextPane.classList.add('active');
+        isAnimating = false;
+      }, 150); // wait for fade out
+    } else if (!currentActive) {
+      nextPane.classList.add('active');
+    }
+  }
+
+  async function loginPassword() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    if (!email || !password) { showAlert('alert-login', 'Fill all fields.'); return; }
+
+    const btn = document.getElementById('login-btn');
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+
+    const res = await API.post('/api/auth/login', { email, password });
+    btn.disabled = false; btn.innerHTML = 'Sign In';
+
+    if (res.ok) {
+      API.setAuth(res.data.token, res.data.user);
+      window.location.href = API.isAdmin() ? '/admin' : '/';
+    } else {
+      showAlert('alert-login', res.data.error || 'Invalid credentials.', 'error');
+    }
+  }
+
+  async function doRegister() {
+    const email = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value;
+    if (!email || !password) { showAlert('alert-login', 'Fill all fields.'); return; }
+
+    const btn = document.getElementById('reg-btn');
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+
+    const res = await API.post('/api/auth/register', { email, password });
+    btn.disabled = false; btn.innerHTML = 'Create Account';
+
+    if (res.ok) {
+      API.setAuth(res.data.token, res.data.user);
+      window.location.href = '/';
+    } else {
+      showAlert('alert-login', res.data.error || 'Registration failed.', 'error');
+    }
+  }
+
+  async function doPasskeyLogin() {
+    try {
+      const result = await loginPasskey();
+      API.setAuth(result.token, result.user);
+      window.location.href = API.isAdmin() ? '/admin' : '/';
+    } catch (e) {
+      showAlert('alert-login', e.message, 'error');
+    }
+  }
+
+  async function doPasskeyRegister() {
+    const emailInput = document.getElementById('passkey-email');
+    const email = emailInput ? emailInput.value.trim() : (API.user() ? API.user().email : '');
+    if (!email) { showAlert('alert-login', 'Enter your email first.', 'error'); return; }
+    try {
+      const btn = event.currentTarget || event.target;
+      if (btn) btn.innerHTML = '<span class="spinner"></span>';
+      const result = await registerPasskey(email);
+      API.setAuth(result.token, result.user);
+      showAlert('alert-login', 'Passkey added successfully!', 'success');
+      setTimeout(() => { window.location.href = '/'; }, 1500);
+    } catch (e) {
+      showAlert('alert-login', e.message, 'error');
+    }
+  }
+</script>
+{% endblock %}
