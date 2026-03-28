@@ -1,0 +1,150 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Passkey Test{% endblock %}
+
+{% block nav %}{% endblock %}
+
+{% block stylesheets %}
+<style>
+  body { font-family: monospace; max-width: 800px; margin: 40px auto; padding: 20px; }
+  button { margin: 5px; padding: 10px 20px; cursor: pointer; }
+  #log { background: #111; color: #0f0; padding: 20px; margin-top: 20px; min-height: 200px; white-space: pre-wrap; }
+  input { padding: 8px; margin: 5px; width: 250px; }
+</style>
+{% endblock %}
+
+{% block body %}
+<h1>Passkey Test</h1>
+<input type="email" id="email" placeholder="email@test.com" value="passkey@test.com">
+<br>
+<button onclick="registerPasskeyTest()">Register Passkey</button>
+<button onclick="loginPasskeyTest()">Login with Passkey</button>
+<button onclick="testProtected()">Test Protected Route</button>
+<div id="log">Ready...\n</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+let currentToken = null;
+
+function log(msg) {
+    document.getElementById('log').textContent += msg + '\n';
+}
+
+function bufferToBase64UrlLocal(buffer) {
+    const bytes = Array.from(new Uint8Array(buffer));
+    const binary = bytes.map(b => String.fromCharCode(b)).join('');
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function base64UrlToBufferLocal(base64url) {
+    let base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
+    const padding = '='.repeat((4 - base64.length % 4) % 4);
+    base64 += padding;
+    const binary = atob(base64);
+    return Uint8Array.from(binary, c => c.charCodeAt(0)).buffer;
+}
+
+async function registerPasskeyTest() {
+    const email = document.getElementById('email').value;
+    log('--- REGISTER ---');
+    log('Getting options for: ' + email);
+
+    const optRes = await fetch('/api/passkey/register/options', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({email})
+    });
+    const options = await optRes.json();
+    const challengeToken = options.challengeToken;
+    delete options.challengeToken;
+    log('Options received: ' + JSON.stringify(options).substring(0, 100) + '...');
+
+    options.challenge = base64UrlToBufferLocal(options.challenge);
+    options.user.id = base64UrlToBufferLocal(options.user.id);
+    if (options.excludeCredentials) {
+        options.excludeCredentials = options.excludeCredentials.map(c => ({
+            ...c, id: base64UrlToBufferLocal(c.id)
+        }));
+    }
+
+    const credential = await navigator.credentials.create({publicKey: options});
+    log('Credential created: ' + credential.id.substring(0, 30) + '...');
+
+    const verifyRes = await fetch('/api/passkey/register/verify', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            challengeToken,
+            id: credential.id,
+            rawId: bufferToBase64UrlLocal(credential.rawId),
+            response: {
+                clientDataJSON: bufferToBase64UrlLocal(credential.response.clientDataJSON),
+                attestationObject: bufferToBase64UrlLocal(credential.response.attestationObject)
+            },
+            type: credential.type,
+        })
+    });
+
+    const result = await verifyRes.json();
+    log('Result: ' + JSON.stringify(result, null, 2));
+    if (result.token) {
+        currentToken = result.token;
+        log('Token stored!');
+    }
+}
+
+async function loginPasskeyTest() {
+    log('--- LOGIN ---');
+
+    const optRes = await fetch('/api/passkey/login/options', {method: 'POST'});
+    const options = await optRes.json();
+    const challengeToken = options.challengeToken;
+    delete options.challengeToken;
+    log('Options received');
+
+    options.challenge = base64UrlToBufferLocal(options.challenge);
+    if (options.allowCredentials) {
+        options.allowCredentials = options.allowCredentials.map(c => ({
+            ...c, id: base64UrlToBufferLocal(c.id)
+        }));
+    }
+
+    const assertion = await navigator.credentials.get({publicKey: options});
+    log('Assertion obtained');
+
+    const verifyRes = await fetch('/api/passkey/login/verify', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            challengeToken,
+            id: assertion.id,
+            rawId: bufferToBase64UrlLocal(assertion.rawId),
+            response: {
+                clientDataJSON: bufferToBase64UrlLocal(assertion.response.clientDataJSON),
+                authenticatorData: bufferToBase64UrlLocal(assertion.response.authenticatorData),
+                signature: bufferToBase64UrlLocal(assertion.response.signature),
+                userHandle: assertion.response.userHandle ? bufferToBase64UrlLocal(assertion.response.userHandle) : null
+            },
+            type: assertion.type,
+        })
+    });
+
+    const result = await verifyRes.json();
+    log('Result: ' + JSON.stringify(result, null, 2));
+    if (result.token) {
+        currentToken = result.token;
+        log('Token stored!');
+    }
+}
+
+async function testProtected() {
+    log('--- PROTECTED ROUTE ---');
+    const res = await fetch('/api/auth/me', {
+        headers: {'Authorization': 'Bearer ' + currentToken}
+    });
+    const result = await res.json();
+    log('Result: ' + JSON.stringify(result, null, 2));
+}
+</script>
+{% endblock %}
