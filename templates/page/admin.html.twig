@@ -375,19 +375,19 @@
 				<div class="stats-row" id="stats-row">
 					<div class="stat-card">
 						<div class="stat-label">Total Events</div>
-						<div class="stat-value" id="stat-total">—</div>
+						<div class="stat-value" id="stat-total">-</div>
 					</div>
 					<div class="stat-card">
 						<div class="stat-label">Upcoming</div>
-						<div class="stat-value" id="stat-upcoming">—</div>
+						<div class="stat-value" id="stat-upcoming">-</div>
 					</div>
 					<div class="stat-card">
 						<div class="stat-label">Ongoing</div>
-						<div class="stat-value" id="stat-ongoing">—</div>
+						<div class="stat-value" id="stat-ongoing">-</div>
 					</div>
 					<div class="stat-card">
 						<div class="stat-label">Passed</div>
-						<div class="stat-value" id="stat-passed">—</div>
+						<div class="stat-value" id="stat-passed">-</div>
 					</div>
 				</div>
 
@@ -448,7 +448,7 @@
 					<div style="display:flex; gap:0.5rem; align-items:center;">
 						<input type="text" id="event-search" placeholder="Type to filter events..." style="flex:1" oninput="filterEventSelect()">
 						<select id="event-select" onchange="loadReservations()" style="flex:2">
-							<option value="">— Choose an event —</option>
+							<option value="">- Choose an event -</option>
 						</select>
 					</div>
 				</div>
@@ -735,7 +735,7 @@ renderEventSelect(allEventsForSelect);
 
 function renderEventSelect(eventsList) {
 const sel = document.getElementById('event-select');
-sel.innerHTML = '<option value="">— Choose an event —</option>';
+sel.innerHTML = '<option value="">- Choose an event -</option>';
 eventsList.forEach(e => {
 const opt = document.createElement('option');
 opt.value = e.id;
@@ -957,7 +957,7 @@ document.getElementById('res-loading').style.display = 'none';
 const event = allEventsForSelect.find(e => e.id == id);
 document.getElementById('res-table-title').textContent = `${
 event ? event.title : 'Event'
-} — ${
+} / ${
 res.data ?. length || 0
 } reservations`;
 

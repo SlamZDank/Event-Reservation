@@ -1,8 +1,6 @@
 #!/bin/sh
 set -e
 
-echo "=== EventRes Container Init ==="
-
 # Generate JWT keys if they do not exist
 echo "[1/4] Checking JWT keys..."
 mkdir -p /var/www/config/jwt
@@ -28,7 +26,7 @@ php bin/console cache:warmup 2>/dev/null || true
 echo "[4/4] Running migrations..."
 php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
 
-# Uncomment the following line to seed the database with fixtures on startup:
+# Uncomment the following line to seed the database:
 # php bin/console doctrine:fixtures:load --no-interaction
 
 echo "=== Starting PHP-FPM ==="

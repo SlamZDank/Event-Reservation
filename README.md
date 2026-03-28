@@ -6,14 +6,14 @@ A modern, full-stack event reservation web application built with **Symfony 7**,
 
 ## ✨ Features
 
-- **Event Management** — Create, edit, and delete events with multi-image upload support and drag-and-drop.
-- **Seat Reservations** — Users can reserve seats with real-time availability checks and capacity enforcement.
-- **JWT Authentication** — Stateless token-based authentication using `lexik/jwt-authentication-bundle`.
-- **Passkey / WebAuthn** — Passwordless login and device registration using biometrics or hardware security keys (`web-auth/webauthn-symfony-bundle`).
-- **Resend Email Integration** — Automated, beautifully styled reservation confirmation emails sent via the [Resend](https://resend.com) API. The API key is securely stored in the database and configurable from the Admin Settings panel — no hardcoded secrets.
-- **Admin Dashboard** — Full admin panel with event CRUD, reservation statistics (total/upcoming/ongoing/passed), and a Settings section for mail configuration.
-- **Dark/Light Theme** — System-wide theme toggle accessible from the navbar, persisted in `localStorage`.
-- **Smooth Animations** — Hardware-accelerated modal transitions, crossfading login tabs, and fade-up effects.
+- **Event Management**: Create, edit, and delete events with multi-image upload support and drag-and-drop.
+- **Seat Reservations**: Users can reserve seats with real-time availability checks and capacity enforcement.
+- **JWT Authentication**: Stateless token-based authentication using `lexik/jwt-authentication-bundle`.
+- **Passkey / WebAuthn**: Passwordless login and device registration using biometrics or hardware security keys (`web-auth/webauthn-symfony-bundle`).
+- **Resend Email Integration**: Automated, beautifully styled reservation confirmation emails sent via the [Resend](https://resend.com) API. The API key is securely stored in the database and configurable from the Admin Settings panel - no hardcoded secrets.
+- **Admin Dashboard**: Full admin panel with event CRUD, reservation statistics (total/upcoming/ongoing/passed), and a Settings section for mail configuration.
+- **Dark/Light Theme**: System-wide theme toggle accessible from the navbar, persisted in `localStorage`.
+- **Smooth Animations**: Hardware-accelerated modal transitions, crossfading login tabs, and fade-up effects.
 
 ---
 
@@ -107,4 +107,4 @@ templates/
 
 ---
 
-**Med Amine Slama — ING-A2-04 — ISSAT Sousse**
+**Med Amine Slama | ING-A2-04 | ISSAT Sousse**

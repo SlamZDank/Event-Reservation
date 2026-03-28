@@ -307,7 +307,7 @@ async function loadEvent() {
   if (!res.ok) { window.location.href = '/'; return; }
 
   const e = res.data;
-  document.title = `EventRes — ${e.title}`;
+  document.title = `EventRes | ${e.title}`;
   document.getElementById('event-date').textContent = formatDate(e.date);
   document.getElementById('event-title').textContent = e.title;
   
