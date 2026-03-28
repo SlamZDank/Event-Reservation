@@ -1,0 +1,298 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}EventRes | Upcoming Events Page{% endblock %}
+
+{% block stylesheets %}
+<style>
+  .hero {
+    padding: 5rem 0 3rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-sub {
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 1rem;
+  }
+  .hero-desc {
+    margin-top: 1.25rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    max-width: 480px;
+  }
+  .events-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-top: 2.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .events-header h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .events-count {
+    font-size: 0.7rem;
+    color: var(--text-faint);
+  }
+
+  /* SEARCH & FILTER BAR */
+  .search-bar {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .search-bar input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    padding: 0.5rem 0.85rem;
+    min-width: 200px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-bar input:focus { border-color: var(--amber); }
+  .search-bar input::placeholder { color: var(--text-faint); }
+  .search-bar select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    padding: 0.5rem 0.85rem;
+    outline: none;
+    cursor: pointer;
+  }
+
+  /* STATUS BADGES */
+  .badge-upcoming { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.25); }
+  .badge-ongoing { background: rgba(74,222,128,0.12); color: var(--green); border: 1px solid rgba(74,222,128,0.25); }
+  .badge-passed { background: rgba(248,113,113,0.08); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+
+  .events-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+  @media (max-width: 1200px) { .events-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 900px) { .events-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .events-grid { grid-template-columns: 1fr; } }
+  .event-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: background 0.15s, border-color 0.15s, transform 0.15s;
+    cursor: pointer;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .event-card:hover { 
+    background: var(--surface2);
+    border-color: var(--text-faint);
+    transform: translateY(-2px);
+  }
+  .event-card-content {
+    padding: 1.75rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .event-card-thumb {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-bottom: 1px solid var(--border);
+  }
+  .event-card:hover { background: var(--surface2); }
+  .event-card-date {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .event-card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    line-height: 1.25;
+    margin-bottom: 0.75rem;
+    color: var(--text);
+  }
+  .event-card-desc {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .event-card-meta {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .event-card-location {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+  }
+  .event-card-location::before { content: '📍 '; }
+  .seats-pill {
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+  }
+  #events-loading { text-align: center; padding: 3rem; color: var(--text-muted); font-size: 0.8rem; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+  <div class="hero fade-up">
+    <p class="hero-sub">ISSAT Sousse — 2026</p>
+    <h1 class="hero-title">Discover<br><em>Upcoming</em><br>Events.</h1>
+    <p class="hero-desc">Browse and reserve your spot at tech conferences, workshops, and hackathons.</p>
+  </div>
+
+  <div class="section">
+    <div class="events-header fade-up fade-up-2">
+      <div style="display:flex; align-items:center; gap:1rem;">
+        <h2>All Events</h2>
+        <span class="events-count" id="events-count"></span>
+      </div>
+      <div class="search-bar">
+        <input type="text" id="user-search" placeholder="Search events..." oninput="debouncedUserSearch()">
+        <select id="user-status-filter" onchange="loadEvents(1)">
+          <option value="">All</option>
+          <option value="upcoming" selected>Upcoming</option>
+          <option value="ongoing">Ongoing</option>
+          <option value="passed">Passed</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="events-loading"><span class="spinner"></span></div>
+    <div id="events-grid" class="events-grid" style="display:none"></div>
+    
+    <div id="pagination" style="display:none; margin-top: 2.5rem; justify-content: center; align-items: center; gap: 1rem;">
+      <button class="btn btn-outline" id="btn-prev" onclick="loadEvents(currentPage - 1)">Previous</button>
+      <span id="page-info" style="font-size: 0.8rem; color: var(--text-muted);"></span>
+      <button class="btn btn-outline" id="btn-next" onclick="loadEvents(currentPage + 1)">Next</button>
+    </div>
+
+    <div id="events-empty" class="empty" style="display:none">
+      <div class="empty-icon">📭</div>
+      <p>No events found.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+let currentPage = 1;
+let searchTimeout = null;
+
+function debouncedUserSearch() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => loadEvents(1), 300);
+}
+
+function getStatusBadge(status) {
+  const labels = { upcoming: 'Upcoming', ongoing: 'Ongoing', passed: 'Passed' };
+  return `<span class="badge badge-${status}">${labels[status] || status}</span>`;
+}
+
+async function loadEvents(page = 1) {
+  currentPage = page;
+  document.getElementById('events-grid').style.display = 'none';
+  document.getElementById('pagination').style.display = 'none';
+  document.getElementById('events-empty').style.display = 'none';
+  document.getElementById('events-loading').style.display = 'block';
+
+  const search = document.getElementById('user-search').value.trim();
+  const status = document.getElementById('user-status-filter').value;
+  
+  let url = `/api/events?page=${page}&limit=12`;
+  if (search) url += `&search=${encodeURIComponent(search)}`;
+  if (status) url += `&status=${status}`;
+
+  const res = await API.get(url);
+  document.getElementById('events-loading').style.display = 'none';
+
+  if (!res.ok || !res.data.data || !res.data.data.length) {
+    document.getElementById('events-empty').style.display = 'block';
+    document.getElementById('events-count').textContent = '0 events';
+    return;
+  }
+
+  const events = res.data.data;
+  const meta = res.data.meta;
+  
+  const grid = document.getElementById('events-grid');
+  grid.innerHTML = '';
+  document.getElementById('events-count').textContent = `${meta.total} event${meta.total !== 1 ? 's' : ''}`;
+
+  events.forEach((event, i) => {
+    const seats = event.available_seats;
+    const seatsBadge = seats === 0
+      ? `<span class="badge badge-red">Sold out</span>`
+      : seats <= 5
+        ? `<span class="badge badge-amber">${seats} left</span>`
+        : `<span class="badge badge-green">${seats} seats</span>`;
+
+    const thumb = event.images && event.images.length > 0 
+      ? `<img src="${event.images[0].url}" alt="${event.title}" class="event-card-thumb">`
+      : `<div class="event-card-thumb" style="background:var(--surface2); display:flex; align-items:center; justify-content:center; font-size:4rem; border-bottom:1px solid var(--border);">📅</div>`;
+
+    const card = document.createElement('a');
+    card.href = `/event/${event.id}`;
+    card.className = `event-card fade-up fade-up-${Math.min(i + 1, 4)}`;
+    card.innerHTML = `
+      ${thumb}
+      <div class="event-card-content">
+        <div class="event-card-date">${formatDate(event.date)} ${getStatusBadge(event.status)}</div>
+        <div class="event-card-title">${event.title}</div>
+        <div class="event-card-desc">${event.description}</div>
+        <div class="event-card-meta">
+          <span class="event-card-location">${event.location}</span>
+          ${seatsBadge}
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  grid.style.display = 'grid';
+  
+  if (meta.last_page > 1) {
+    document.getElementById('pagination').style.display = 'flex';
+    document.getElementById('btn-prev').disabled = meta.page <= 1;
+    document.getElementById('btn-next').disabled = meta.page >= meta.last_page;
+    document.getElementById('page-info').textContent = `Page ${meta.page} of ${meta.last_page}`;
+  }
+}
+
+loadEvents();
+</script>
+{% endblock %}
