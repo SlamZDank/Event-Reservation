@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EventRes{% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="/icons/favicon.ico">
+    <link rel="stylesheet" href="/css/app.css">
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+    <div class="m3-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    {% block nav %}
+        {% include '_nav.html.twig' %}
+    {% endblock %}
+
+    <main class="site-content" style="flex: 1; display: flex; flex-direction: column;">
+        {% block body %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-grid">
+            <div class="footer-brand">
+              <h3 style="color:var(--amber); font-family:'Syne', sans-serif;">EventRes</h3>
+              <p>Your premier destination for campus events and workshops at ISSAT Sousse.</p>
+            </div>
+            <div class="footer-links">
+              <h4>Quick Links</h4>
+              <ul style="list-style:none;">
+                <li><a href="/">Events</a></li>
+                <li><a href="/login">Administration</a></li>
+              </ul>
+            </div>
+            <div class="footer-social">
+              <h4>Connect</h4>
+              <p>Keep up to date</p>
+              <div class="social-icons">
+                <a href="#">FB</a> &middot; <a href="#">IG</a> &middot; <a href="#">X</a>
+              </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 EventRes | ISSAT Sousse Project</p>
+        </div>
+    </footer>
+
+    <script src="/js/app.js?v=9"></script>
+    {% block javascripts %}{% endblock %}
+</body>
+</html>
